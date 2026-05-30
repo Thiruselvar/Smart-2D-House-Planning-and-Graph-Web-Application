@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Plan Editor')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<div th:replace="~{fragments/layout :: sidebar('new')}"></div>
+<main class="main-with-sidebar">
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <form id="planForm" th:action="@{/plans/save}" th:object="${planRequest}" method="post">
+        <input type="hidden" th:field="*{planId}"/>
+        <input type="hidden" id="planId" th:value="${planId}"/>
+        <input type="hidden" id="planJsonData" th:field="*{generatedPlanData}" th:value="${planJson}"/>
+
+        <div class="row g-3">
+            <div class="col-lg-4">
+                <div class="plan-panel">
+                    <h5><i class="bi bi-sliders"></i> Requirements</h5>
+                    <div class="mb-2">
+                        <label class="form-label small">Plan Name</label>
+                        <input th:field="*{planName}" class="form-control form-control-sm" placeholder="My House"/>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">Plot Width (m)</label>
+                            <input th:field="*{plotWidth}" type="number" step="0.5" min="10" class="form-control form-control-sm" required/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">Plot Height (m)</label>
+                            <input th:field="*{plotHeight}" type="number" step="0.5" min="10" class="form-control form-control-sm" required/>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-6">
+                            <label class="form-label small">Floors</label>
+                            <input th:field="*{floors}" type="number" min="1" max="5" class="form-control form-control-sm"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">Preferred Room (m)</label>
+                            <input th:field="*{preferredRoomDim}" class="form-control form-control-sm" placeholder="4"/>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-6">
+                            <label class="form-label small">Bedrooms</label>
+                            <input th:field="*{bedrooms}" type="number" min="0" max="10" class="form-control form-control-sm"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">Bathrooms</label>
+                            <input th:field="*{bathrooms}" type="number" min="0" max="10" class="form-control form-control-sm"/>
+                        </div>
+                    </div>
+                    <div class="mt-2 small">
+                        <div class="form-check"><input th:field="*{kitchen}" type="checkbox" class="form-check-input" id="kitchen"/><label class="form-check-label" for="kitchen">Kitchen</label></div>
+                        <div class="form-check"><input th:field="*{hallRequired}" type="checkbox" class="form-check-input" id="hallRequired"/><label class="form-check-label" for="hallRequired">Hall / Living</label></div>
+                        <div class="form-check"><input th:field="*{parking}" type="checkbox" class="form-check-input" id="parking"/><label class="form-check-label" for="parking">Parking</label></div>
+                        <div class="form-check"><input th:field="*{staircase}" type="checkbox" class="form-check-input" id="staircase"/><label class="form-check-label" for="staircase">Staircase</label></div>
+                        <div class="form-check"><input th:field="*{balcony}" type="checkbox" class="form-check-input" id="balcony"/><label class="form-check-label" for="balcony">Balcony</label></div>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button type="button" id="btnGenerate" class="btn btn-engineering btn-sm"><i class="bi bi-magic"></i> Generate Layout</button>
+                        <button type="submit" class="btn btn-accent btn-sm"><i class="bi bi-save"></i> Save to Database</button>
+                    </div>
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-4"><div class="stat-card"><div class="small text-secondary">Plot</div><div class="value" id="statPlot">0</div></div></div>
+                    <div class="col-4"><div class="stat-card"><div class="small text-secondary">Built-up</div><div class="value" id="statBuiltUp">0</div></div></div>
+                    <div class="col-4"><div class="stat-card"><div class="small text-secondary">Free</div><div class="value" id="statFree">0</div></div></div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="plan-panel">
+                    <div class="canvas-toolbar d-flex flex-wrap gap-2 align-items-center">
+                        <span class="small text-secondary">Interactive Canvas — drag rooms, resize from corner</span>
+                        <div class="ms-auto d-flex gap-1">
+                            <button type="button" id="btnZoomOut" class="btn btn-sm btn-outline-light"><i class="bi bi-zoom-out"></i></button>
+                            <button type="button" id="btnZoomIn" class="btn btn-sm btn-outline-light"><i class="bi bi-zoom-in"></i></button>
+                            <button type="button" id="btnExportPng" class="btn btn-sm btn-outline-warning">PNG</button>
+                            <button type="button" id="btnSaveLayout" class="btn btn-sm btn-outline-info" th:if="${planId != null}">Save Layout</button>
+                            <a th:if="${planId != null}" th:href="@{/plans/{id}/export/pdf(id=${planId})}" class="btn btn-sm btn-outline-warning">PDF</a>
+                        </div>
+                    </div>
+                    <canvas id="planCanvas" width="800" height="500"></canvas>
+                    <p class="small text-secondary mt-2 mb-0">
+                        Grid: 0.5m snap | Doors (brown) | Windows (blue line) | Yellow border = plot boundary
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/plan-canvas.js}"></script>
+</body>
+</html>

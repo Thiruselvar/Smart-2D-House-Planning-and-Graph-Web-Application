@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<main class="container-fluid py-4" style="margin-top: 56px;">
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <h2 class="mb-4"><i class="bi bi-shield-lock"></i> Admin Panel</h2>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card"><div class="small text-secondary">Users</div><div class="value" th:text="${userCount}">0</div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card"><div class="small text-secondary">Plans</div><div class="value" th:text="${planCount}">0</div></div>
+        </div>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="plan-panel">
+                <h5>All Users</h5>
+                <table class="table table-blueprint table-sm">
+                    <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="u : ${users}">
+                        <td th:text="${u.userId}"></td>
+                        <td th:text="${u.username}"></td>
+                        <td th:text="${u.email}"></td>
+                        <td th:text="${u.role}"></td>
+                        <td>
+                            <form th:if="${u.username != 'admin'}" th:action="@{/admin/users/{id}/delete(id=${u.userId})}" method="post" class="d-inline">
+                                <button class="btn btn-sm btn-outline-danger">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="plan-panel">
+                <h5>All House Plans</h5>
+                <table class="table table-blueprint table-sm">
+                    <thead><tr><th>ID</th><th>Name</th><th>User</th><th>Plot</th><th></th></tr></thead>
+                    <tbody>
+                    <tr th:each="p : ${plans}">
+                        <td th:text="${p.planId}"></td>
+                        <td th:text="${p.planName}"></td>
+                        <td th:text="${p.user.username}"></td>
+                        <td th:text="${p.plotWidth + '×' + p.plotHeight}"></td>
+                        <td>
+                            <form th:action="@{/admin/plans/{id}/delete(id=${p.planId})}" method="post" class="d-inline">
+                                <button class="btn btn-sm btn-outline-danger">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <a th:href="@{/dashboard}" class="btn btn-outline-light mt-3">Back to Dashboard</a>
+</main>
+</body>
+</html>

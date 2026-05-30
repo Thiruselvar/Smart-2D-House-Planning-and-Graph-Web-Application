@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Register')}"></head>
+<body class="blueprint-bg d-flex align-items-center justify-content-center min-vh-100 py-4">
+<div class="container" style="max-width: 440px;">
+    <div class="auth-card p-4">
+        <h4 class="mb-3">Create Account</h4>
+        <form th:action="@{/register}" th:object="${registerDto}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input th:field="*{username}" class="form-control" required/>
+                <div class="text-danger small" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input th:field="*{email}" type="email" class="form-control" required/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input th:field="*{password}" type="password" class="form-control" required/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input th:field="*{confirmPassword}" type="password" class="form-control" required/>
+            </div>
+            <button type="submit" class="btn btn-accent w-100">Register</button>
+        </form>
+        <p class="text-center mt-3 small"><a th:href="@{/login}" class="text-info">Back to login</a></p>
+    </div>
+</div>
+</body>
+</html>
